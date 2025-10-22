@@ -2,17 +2,7 @@ import { Card, CardHeader, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Separator } from '../components/ui/separator';
-import {
-  X,
-  Calendar,
-  MapPin,
-  Book,
-  User,
-  Phone,
-  Home,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+import { X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 import type { Tumulo } from '../interfaces/Tumulo';
 

@@ -79,7 +79,7 @@ export function SearchBar() {
   };
 
   const handleSelectResult = (tumulo: Tumulo) => {
-    setSearchTerm(tumulo.nome);
+    setSearchTerm(tumulo.nome || '');
     setShowResults(false);
     setTumuloSelecionado(tumulo);
   };
