@@ -1,6 +1,12 @@
-import type { Tumulo, TumuloListResponse, TumuloResponse } from '@/interfaces/Tumulo';
+import type {
+  Tumulo,
+  TumuloListResponse,
+  TumuloResponse,
+} from '@/interfaces/Tumulo';
 
-const API_URL = 'http://localhost:3333/tumulos';
+const API_URL = process.env.REACT_APP_API_URL
+  ? `${process.env.REACT_APP_API_URL}/tumulos`
+  : 'http://localhost:3333/tumulos';
 
 export async function getAllTumulos(): Promise<Tumulo[]> {
   const res = await fetch(`${API_URL}/all`);
@@ -8,11 +14,11 @@ export async function getAllTumulos(): Promise<Tumulo[]> {
     throw new Error('Erro ao buscar túmulos');
   }
   const response: TumuloListResponse = await res.json();
-  
+
   if (!response.success) {
-    throw new Error(response.message || 'Erro ao buscar túmulos');
+    throw new Error('Erro ao buscar túmulos');
   }
-  
+
   return response.data;
 }
 
@@ -22,11 +28,11 @@ export async function getTumuloPorQuery(name: string): Promise<Tumulo[]> {
     throw new Error('Erro ao buscar túmulos');
   }
   const response: TumuloListResponse = await res.json();
-  
+
   if (!response.success) {
-    throw new Error(response.message || 'Erro ao buscar túmulos');
+    throw new Error('Erro ao buscar túmulos');
   }
-  
+
   return response.data;
 }
 
@@ -36,11 +42,11 @@ export async function getTumuloById(id: number): Promise<Tumulo | null> {
     throw new Error('Erro ao buscar túmulo');
   }
   const response: TumuloResponse = await res.json();
-  
+
   if (!response.success) {
     throw new Error(response.message || 'Erro ao buscar túmulo');
   }
-  
+
   return response.data;
 }
 
