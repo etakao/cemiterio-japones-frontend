@@ -4,8 +4,8 @@ import type {
   TumuloResponse,
 } from '@/interfaces/Tumulo';
 
-const API_URL = import.meta.env.REACT_APP_API_URL
-  ? `${import.meta.env.REACT_APP_API_URL}/tumulos`
+const API_URL = import.meta.env.API_URL
+  ? `${import.meta.env.API_URL}/tumulos`
   : 'http://localhost:3000/tumulos';
 
 export async function getAllTumulos(): Promise<Tumulo[]> {
