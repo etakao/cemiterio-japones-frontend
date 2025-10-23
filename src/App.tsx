@@ -6,7 +6,7 @@ function App() {
   const { carregando } = useTumulo();
 
   return (
-    <div className='relative flex w-screen h-screen'>
+    <div className='relative flex w-screen h-dvh'>
       {carregando && (
         <div className='absolute inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-lg'>
           <img

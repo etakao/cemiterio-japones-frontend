@@ -16,7 +16,7 @@ export default function Mapa() {
       zoom={20}
       minZoom={0}
       maxZoom={22}
-      style={{ height: '100vh', width: '100vw', zIndex: 0 }}
+      style={{ height: '100dvh', width: '100%', zIndex: 0 }}
     >
       <TileLayer
         url='https://api.maptiler.com/maps/basic/{z}/{x}/{y}.png?key=uLS5ms4Ua7PgHnXgLldX'
