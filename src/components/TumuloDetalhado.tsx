@@ -17,7 +17,7 @@ export default function TumuloDetalhado() {
       coords.reduce((sum, [lng]) => sum + lng, 0) / coords.length,
     ];
 
-    map.flyTo(center, map.getZoom(), { animate: true });
+    map.flyTo(center, 22, { animate: true });
 
     const timeout = setTimeout(() => {
       const popupContent = `

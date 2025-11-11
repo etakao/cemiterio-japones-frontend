@@ -57,7 +57,6 @@ export default function UserLocation() {
         } else {
           const marker = L.marker(newLatLng, { icon: userIcon }).addTo(map);
           setUserMarker(marker);
-          map.setView(newLatLng, 18); // ✅ Centraliza apenas na primeira vez
 
           // Quando o popup for fechado, desmarca o túmulo
           marker.on('popupclose', () => setTumuloSelecionado(null));
