@@ -22,7 +22,7 @@ export default function TumuloDetalhado() {
     const timeout = setTimeout(() => {
       const popupContent = `
         <div style="max-width: 250px;">
-        <p style="margin: 4px auto;">Fileira: ${
+        <p style="margin: 4px auto; text-align: center;">Fileira: ${
           tumuloDetalhado.fileira
         } | Posição: ${tumuloDetalhado.posicao}</p>
           <img src="${

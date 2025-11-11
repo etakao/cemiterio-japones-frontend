@@ -39,7 +39,7 @@ export function TumuloProvider({ children }: { children: ReactNode }) {
 
       setTimeout(() => {
         setCarregando(false);
-      }, 3000);
+      }, 2000);
     };
     fetchTumulos();
   }, []);
