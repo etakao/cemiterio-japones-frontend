@@ -16,7 +16,7 @@ export function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { setTumuloSelecionado } = useTumulo();
+  const { tumuloDetalhado, setTumuloDetalhado } = useTumulo();
 
   async function fetchFilteredResults(query: string) {
     if (query.length === 0) {
@@ -34,15 +34,18 @@ export function SearchBar() {
 
   // Filtrar resultados baseado no termo de busca
   useEffect(() => {
-    if (searchTerm.length > 0) {
-      fetchFilteredResults(searchTerm).then((results) => {
-        setFilteredResults(results);
-        setShowResults(results.length > 0);
-      });
-    } else {
+    if (searchTerm == tumuloDetalhado?.nome) return;
+
+    if (searchTerm.length < 2) {
       setFilteredResults([]);
       setShowResults(false);
+      return;
     }
+
+    fetchFilteredResults(searchTerm).then((results) => {
+      setFilteredResults(results);
+      setShowResults(results.length > 0);
+    });
   }, [searchTerm]);
 
   // Focar no input quando expandir
@@ -81,7 +84,8 @@ export function SearchBar() {
   const handleSelectResult = (tumulo: Tumulo) => {
     setSearchTerm(tumulo.nome || '');
     setShowResults(false);
-    setTumuloSelecionado(tumulo);
+    setIsExpanded(false);
+    setTumuloDetalhado(tumulo);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

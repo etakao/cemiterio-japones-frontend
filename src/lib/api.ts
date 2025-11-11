@@ -6,11 +6,10 @@ import type {
 
 const API_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/tumulos`
-  : 'http://localhost:3000/tumulos';
+  : 'http://localhost:3333/tumulos';
 
 export async function getAllTumulos(): Promise<Tumulo[]> {
   const res = await fetch(`${API_URL}/all`);
-  console.log(res);
 
   if (!res.ok) {
     throw new Error('Erro ao buscar túmulos');
@@ -47,6 +46,24 @@ export async function getTumuloById(id: number): Promise<Tumulo | null> {
 
   if (!response.success) {
     throw new Error(response.message || 'Erro ao buscar túmulo');
+  }
+
+  return response.data;
+}
+
+export async function getDistanceAndAngleFromLocation(
+  id: number,
+  lat: number,
+  lon: number
+) {
+  const res = await fetch(`${API_URL}/${id}/distance?lat=${lat}&lon=${lon}`);
+  if (!res.ok) {
+    throw new Error('Erro ao buscar distância e ângulo');
+  }
+  const response = await res.json();
+
+  if (!response.success) {
+    throw new Error(response.message || 'Erro ao buscar distância e ângulo');
   }
 
   return response.data;

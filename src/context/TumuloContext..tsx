@@ -13,6 +13,8 @@ type TumuloContextType = {
   setTumulos: (tumulos: Tumulo[]) => void;
   tumulosEncontrados: Tumulo[];
   setTumulosEncontrados: (tumulos: Tumulo[]) => void;
+  tumuloDetalhado: Tumulo | null | undefined;
+  setTumuloDetalhado: (tumulo: Tumulo | null) => void;
   tumuloSelecionado: Tumulo | null | undefined;
   setTumuloSelecionado: (tumulo: Tumulo | null) => void;
   carregando: boolean;
@@ -23,6 +25,7 @@ const TumuloContext = createContext<TumuloContextType | undefined>(undefined);
 export function TumuloProvider({ children }: { children: ReactNode }) {
   const [tumulos, setTumulos] = useState<Tumulo[]>([]);
   const [tumulosEncontrados, setTumulosEncontrados] = useState<Tumulo[]>([]);
+  const [tumuloDetalhado, setTumuloDetalhado] = useState<Tumulo | null>();
   const [tumuloSelecionado, setTumuloSelecionado] = useState<Tumulo | null>();
   const [carregando, setCarregando] = useState(true);
 
@@ -48,6 +51,8 @@ export function TumuloProvider({ children }: { children: ReactNode }) {
         setTumulos,
         tumulosEncontrados,
         setTumulosEncontrados,
+        tumuloDetalhado,
+        setTumuloDetalhado,
         tumuloSelecionado,
         setTumuloSelecionado,
         carregando,

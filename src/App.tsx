@@ -19,7 +19,7 @@ function App() {
 
       <Mapa />
 
-      <div className='fixed top-10 right-10 z-40'>
+      <div className='fixed top-6 right-6 z-40'>
         <SearchBar />
       </div>
     </div>

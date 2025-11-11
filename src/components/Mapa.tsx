@@ -1,4 +1,4 @@
-import UpdateCenter from './UpdateCenter';
+import TumuloDetalhado from './TumuloDetalhado';
 import { useTumulo } from '../context/TumuloContext.';
 import type { LatLngExpression } from 'leaflet';
 import { MapContainer, Polygon, TileLayer } from 'react-leaflet';
@@ -6,8 +6,10 @@ import UserLocation from './UserLocation';
 import CenterLocation from './CenterLocation';
 
 export default function Mapa() {
-  const { tumulos, tumuloSelecionado, setTumuloSelecionado } = useTumulo();
+  const { tumulos, tumuloDetalhado, tumuloSelecionado, setTumuloDetalhado } =
+    useTumulo();
 
+  // localizacao cemiterio
   const center: LatLngExpression = [-22.0948, -51.4975];
 
   return (
@@ -32,7 +34,7 @@ export default function Mapa() {
         maxZoom={22}
       />
 
-      <UpdateCenter />
+      <TumuloDetalhado />
 
       <UserLocation />
 
@@ -46,11 +48,22 @@ export default function Mapa() {
           interactive
           eventHandlers={{
             click: () => {
-              setTumuloSelecionado(tumulo);
+              setTumuloDetalhado(tumulo);
             },
           }}
         />
       ))}
+
+      {tumuloDetalhado && (
+        <Polygon
+          positions={tumuloDetalhado.geom.coordinates[0].map(([lng, lat]) => [
+            lat,
+            lng,
+          ])}
+          color='yellow'
+          interactive
+        />
+      )}
 
       {tumuloSelecionado && (
         <Polygon
@@ -58,7 +71,7 @@ export default function Mapa() {
             lat,
             lng,
           ])}
-          color='yellow'
+          color='green'
           interactive
         />
       )}
