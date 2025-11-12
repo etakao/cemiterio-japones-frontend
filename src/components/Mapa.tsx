@@ -4,6 +4,7 @@ import type { LatLngExpression } from 'leaflet';
 import { MapContainer, Polygon, TileLayer } from 'react-leaflet';
 import UserLocation from './UserLocation';
 import CenterLocation from './CenterLocation';
+import TumuloSelecionadoPopup from './TumuloSelecionadoPopup';
 
 export default function Mapa() {
   const { tumulos, tumuloDetalhado, tumuloSelecionado, setTumuloDetalhado } =
@@ -65,6 +66,7 @@ export default function Mapa() {
         />
       )}
 
+      <TumuloSelecionadoPopup />
       {tumuloSelecionado && (
         <Polygon
           positions={tumuloSelecionado.geom.coordinates[0].map(([lng, lat]) => [

@@ -125,7 +125,7 @@ export function SearchBar() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className='border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-8'
+                className='border-0 outline-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 h-8'
               />
             </div>
             <Button

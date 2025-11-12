@@ -35,10 +35,6 @@ export default function CenterLocation() {
         animate: true,
         duration: 2,
       });
-      // map.panTo(userPosition, {
-      //   animate: true,
-      //   duration: 2,
-      // });
     }
   };
 

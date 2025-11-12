@@ -3,6 +3,7 @@ import { useMap } from 'react-leaflet';
 import L, { LatLng, Marker as LeafletMarker } from 'leaflet';
 import { useTumulo } from '../context/TumuloContext.';
 import { getDistanceAndAngleFromLocation } from '../lib/api';
+import type { DistanceAndAngle } from '@/interfaces/DistanceAndAngle';
 
 const userIcon = L.icon({
   iconUrl: '/location.png',
@@ -13,6 +14,8 @@ const userIcon = L.icon({
 export default function UserLocation() {
   const map = useMap();
   const { tumuloSelecionado, carregando, setTumuloSelecionado } = useTumulo();
+  const [distanceAndAngle, setDistanceAndAngle] =
+    useState<DistanceAndAngle | null>(null);
 
   const [userMarker, setUserMarker] = useState<LeafletMarker | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -41,7 +44,7 @@ export default function UserLocation() {
   };
 
   // Obtém localização e atualiza marcador
-  const updateUserLocation = async (showPopup = false) => {
+  const updateUserLocation = async () => {
     if (!navigator.geolocation) {
       alert('Geolocalização não é suportada neste navegador.');
       return;
@@ -57,29 +60,24 @@ export default function UserLocation() {
         } else {
           const marker = L.marker(newLatLng, { icon: userIcon }).addTo(map);
           setUserMarker(marker);
-
-          // Quando o popup for fechado, desmarca o túmulo
-          marker.on('popupclose', () => setTumuloSelecionado(null));
         }
 
         if (tumuloSelecionado) {
+          map.flyTo(newLatLng, 22, { animate: true, duration: 2 });
+
           try {
-            const { distance } = await getDistanceAndAngleFromLocation(
+            const response = await getDistanceAndAngleFromLocation(
               tumuloSelecionado.id,
               latitude,
               longitude
             );
 
-            userMarker
-              ?.bindPopup(
-                `Distância até o túmulo: ${distance.toFixed(2)} metros`
-              )
-              .openPopup();
+            setTimeout(() => {
+              setDistanceAndAngle(response);
+            }, 2000);
           } catch (error) {
             console.error('Erro ao calcular distância:', error);
           }
-        } else if (showPopup) {
-          userMarker?.closePopup();
         }
       },
       (err) => console.error('Erro ao obter localização:', err),
@@ -103,8 +101,8 @@ export default function UserLocation() {
     }
 
     if (tumuloSelecionado) {
-      updateUserLocation(true);
-      intervalRef.current = setInterval(() => updateUserLocation(true), 4000);
+      updateUserLocation();
+      intervalRef.current = setInterval(() => updateUserLocation(), 4000);
     }
 
     return () => {
@@ -112,6 +110,42 @@ export default function UserLocation() {
     };
   }, [tumuloSelecionado]);
 
-  return null;
+  if (tumuloSelecionado)
+    return (
+      <>
+        {distanceAndAngle?.distance && (
+          <div className='fixed top-5 left-1/2 transform -translate-x-1/2 bg-white p-3 rounded shadow-lg z-[9999] flex items-center gap-3'>
+            <div className='flex flex-col'>
+              <strong>Túmulo Selecionado: {tumuloSelecionado.nome}</strong>
+              <span>
+                Distância até o túmulo:{' '}
+                {distanceAndAngle
+                  ? `${distanceAndAngle.distance.toFixed(2)} metros`
+                  : 'Calculando distância...'}
+              </span>
+            </div>
+
+            <button
+              onClick={() => setTumuloSelecionado(null)}
+              className='w-6 h-6 top-0 right-0 p-1 bg-red-500 text-white rounded cursor-pointer'
+            >
+              x
+            </button>
+          </div>
+        )}
+
+        {distanceAndAngle?.angle && (
+          <div className='absolute bottom-18 right-5 md:right-6 cursor-pointer z-[9999] bg-white p-3 rounded-lg'>
+            <img
+              src='arrow-direction.png'
+              alt='Direção'
+              className={`w-4 h-4 rotate-[${
+                distanceAndAngle ? distanceAndAngle.angle : 0
+              }deg]`}
+            />
+          </div>
+        )}
+      </>
+    );
 }
 

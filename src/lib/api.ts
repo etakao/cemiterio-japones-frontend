@@ -1,3 +1,4 @@
+import type { DistanceAndAngle } from '@/interfaces/DistanceAndAngle';
 import type {
   Tumulo,
   TumuloListResponse,
@@ -55,7 +56,7 @@ export async function getDistanceAndAngleFromLocation(
   id: number,
   lat: number,
   lon: number
-) {
+): Promise<DistanceAndAngle | null> {
   const res = await fetch(`${API_URL}/${id}/distance?lat=${lat}&lon=${lon}`);
   if (!res.ok) {
     throw new Error('Erro ao buscar distância e ângulo');
