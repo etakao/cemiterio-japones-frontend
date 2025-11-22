@@ -11,6 +11,8 @@ const userIcon = L.icon({
   iconAnchor: [10, 10],
 });
 
+const MIN_MOVEMENT_METERS = 2;
+
 export default function UserLocation() {
   const map = useMap();
   const { tumuloSelecionado, carregando, setTumuloSelecionado } = useTumulo();
@@ -56,6 +58,12 @@ export default function UserLocation() {
         const newLatLng = L.latLng(latitude, longitude);
 
         if (userMarker) {
+          const prev = userMarker.getLatLng();
+          const dif = map.distance(prev, newLatLng);
+
+          // Ignora pequenas oscilações do GPS
+          if (dif < MIN_MOVEMENT_METERS) return;
+
           animateMarkerTo(userMarker, newLatLng);
         } else {
           const marker = L.marker(newLatLng, { icon: userIcon }).addTo(map);
@@ -139,13 +147,11 @@ export default function UserLocation() {
             <img
               src='arrow-direction.png'
               alt='Direção'
-              className={`w-4 h-4 rotate-[${
-                distanceAndAngle ? distanceAndAngle.angle : 0
-              }deg]`}
+              style={{ transform: `rotate(${distanceAndAngle.angle}deg)` }}
+              className='w-4 h-4 transition-transform duration-300'
             />
           </div>
         )}
       </>
     );
 }
-
