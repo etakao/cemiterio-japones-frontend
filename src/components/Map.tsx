@@ -1,12 +1,12 @@
-import TumuloDetalhado from './TumuloDetalhado';
+import TumuloDetailed from './TumuloDetailed';
 import { useTumulo } from '../context/TumuloContext.';
 import type { LatLngExpression } from 'leaflet';
 import { MapContainer, Polygon, TileLayer } from 'react-leaflet';
 import UserLocation from './UserLocation';
 import CenterLocation from './CenterLocation';
-import TumuloSelecionadoPopup from './TumuloSelecionadoPopup';
+import TumuloSelectedPopup from './TumuloSelectedPopup';
 
-export default function Mapa() {
+export default function Map() {
   const { tumulos, tumuloDetalhado, tumuloSelecionado, setTumuloDetalhado } =
     useTumulo();
 
@@ -35,7 +35,7 @@ export default function Mapa() {
         maxZoom={22}
       />
 
-      <TumuloDetalhado />
+      <TumuloDetailed />
 
       <UserLocation />
 
@@ -66,7 +66,7 @@ export default function Mapa() {
         />
       )}
 
-      <TumuloSelecionadoPopup />
+      <TumuloSelectedPopup />
       {tumuloSelecionado && (
         <Polygon
           positions={tumuloSelecionado.geom.coordinates[0].map(([lng, lat]) => [

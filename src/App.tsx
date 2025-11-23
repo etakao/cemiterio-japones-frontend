@@ -1,5 +1,5 @@
 import { SearchBar } from './components/SearchBar';
-import Mapa from './components/Mapa';
+import Map from './components/Map';
 import { useTumulo } from './context/TumuloContext.';
 
 function App() {
@@ -17,7 +17,7 @@ function App() {
         </div>
       )}
 
-      <Mapa />
+      <Map />
 
       <div className='fixed top-6 right-6 z-40'>
         <SearchBar />

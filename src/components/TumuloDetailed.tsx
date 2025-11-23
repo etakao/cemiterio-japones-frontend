@@ -3,7 +3,7 @@ import { useMap } from 'react-leaflet';
 import L, { type LatLngExpression } from 'leaflet';
 import { useTumulo } from '../context/TumuloContext.';
 
-export default function TumuloDetalhado() {
+export default function TumuloDetailed() {
   const map = useMap();
   const { tumuloDetalhado, setTumuloDetalhado, setTumuloSelecionado } =
     useTumulo();
