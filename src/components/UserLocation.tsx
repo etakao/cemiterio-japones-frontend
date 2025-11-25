@@ -11,7 +11,8 @@ const userIcon = L.icon({
   iconAnchor: [10, 10],
 });
 
-const MIN_MOVEMENT_METERS = 2;
+// --- PEQUENAS MOVIMENTAÇÕES SÃO IGNORADAS (< 2m)
+const MIN_MOVE_DISTANCE = 2; // metros
 
 export default function UserLocation() {
   const map = useMap();
@@ -20,10 +21,10 @@ export default function UserLocation() {
     useState<DistanceAndAngle | null>(null);
 
   const [userMarker, setUserMarker] = useState<LeafletMarker | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const hasLocatedInitially = useRef(false);
+  const watchIdRef = useRef<number | null>(null);
+  const lastLatLngRef = useRef<LatLng | null>(null);
 
-  // Anima movimento do marcador
+  // --- Animação suave ---
   const animateMarkerTo = (
     marker: LeafletMarker,
     newLatLng: LatLng,
@@ -38,120 +39,122 @@ export default function UserLocation() {
         startLatLng.lat + (newLatLng.lat - startLatLng.lat) * progress;
       const lng =
         startLatLng.lng + (newLatLng.lng - startLatLng.lng) * progress;
+
       marker.setLatLng([lat, lng]);
+
       if (progress < 1) requestAnimationFrame(step);
     };
 
     requestAnimationFrame(step);
   };
 
-  // Obtém localização e atualiza marcador
-  const updateUserLocation = async () => {
-    if (!navigator.geolocation) {
-      alert('Geolocalização não é suportada neste navegador.');
-      return;
-    }
+  // --- Função de callback do watchPosition ---
+  const handleLocation = async (pos: GeolocationPosition) => {
+    const { latitude, longitude } = pos.coords;
+    const newLatLng = L.latLng(latitude, longitude);
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const newLatLng = L.latLng(latitude, longitude);
+    // --- filtra micro variações < 2m ---
+    // if (lastLatLngRef.current) {
+    //   const d = map.distance(lastLatLngRef.current, newLatLng);
 
-        if (userMarker) {
-          const prev = userMarker.getLatLng();
-          const dif = map.distance(prev, newLatLng);
+    //   if (d < MIN_MOVE_DISTANCE) return; // ignora "tremedeira"
+    // }
+    lastLatLngRef.current = newLatLng;
 
-          // Ignora pequenas oscilações do GPS
-          if (dif < MIN_MOVEMENT_METERS) return;
+    if (userMarker) {
+      animateMarkerTo(userMarker, newLatLng);
+    } else {
+      const marker = L.marker(newLatLng, { icon: userIcon }).addTo(map);
+      marker.bindPopup('Você está aqui');
+      setUserMarker(marker);
 
-          animateMarkerTo(userMarker, newLatLng);
-        } else {
-          const marker = L.marker(newLatLng, { icon: userIcon }).addTo(map);
-          setUserMarker(marker);
-        }
-
-        if (tumuloSelecionado) {
-          map.flyTo(newLatLng, 22, { animate: true, duration: 2 });
-
-          try {
-            const response = await getDistanceAndAngleFromLocation(
-              tumuloSelecionado.id,
-              latitude,
-              longitude
-            );
-
-            setTimeout(() => {
-              setDistanceAndAngle(response);
-            }, 2000);
-          } catch (error) {
-            console.error('Erro ao calcular distância:', error);
-          }
-        }
-      },
-      (err) => console.error('Erro ao obter localização:', err),
-      { enableHighAccuracy: true }
-    );
-  };
-
-  // Localiza apenas uma vez quando o mapa carregar
-  useEffect(() => {
-    if (carregando || hasLocatedInitially.current) return;
-
-    hasLocatedInitially.current = true;
-    updateUserLocation();
-  }, [carregando, map]);
-
-  // Atualiza a cada 4s quando há túmulo selecionado
-  useEffect(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+      // Primeira vez → centraliza
+      map.setView(newLatLng, 20);
     }
 
     if (tumuloSelecionado) {
-      updateUserLocation();
-      intervalRef.current = setInterval(() => updateUserLocation(), 4000);
+      try {
+        const response = await getDistanceAndAngleFromLocation(
+          tumuloSelecionado.id,
+          latitude,
+          longitude
+        );
+
+        setDistanceAndAngle(response);
+      } catch (error) {
+        console.error('Erro ao calcular distância:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (carregando) return;
+
+    if (!navigator.geolocation) {
+      alert('Seu navegador não suporta geolocalização.');
+      return;
     }
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [tumuloSelecionado]);
+    // --- Inicia rastreamento contínuo ---
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      handleLocation,
+      console.error,
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000,
+      }
+    );
 
+    return () => {
+      // --- Remove rastreamento ao desmontar (IMPORTANTÍSSIMO) ---
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, [carregando, tumuloSelecionado]);
+
+  // --- HUD de distância ---
   if (tumuloSelecionado)
     return (
       <>
-        {distanceAndAngle?.distance && (
+        {distanceAndAngle?.distance !== undefined && (
           <div className='fixed top-5 left-1/2 transform -translate-x-1/2 bg-white p-3 rounded shadow-lg z-[9999] flex items-center gap-3'>
             <div className='flex flex-col'>
-              <strong>Túmulo Selecionado: {tumuloSelecionado.nome}</strong>
+              <strong>Túmulo: {tumuloSelecionado.nome}</strong>
               <span>
-                Distância até o túmulo:{' '}
+                Distância:{' '}
                 {distanceAndAngle
-                  ? `${distanceAndAngle.distance.toFixed(2)} metros`
-                  : 'Calculando distância...'}
+                  ? `${distanceAndAngle.distance.toFixed(2)} m`
+                  : 'Calculando...'}
               </span>
             </div>
 
             <button
               onClick={() => setTumuloSelecionado(null)}
-              className='w-6 h-6 top-0 right-0 p-1 bg-red-500 text-white rounded cursor-pointer'
+              className='w-6 h-6 bg-red-500 text-white rounded flex items-center justify-center'
             >
               x
             </button>
           </div>
         )}
 
-        {distanceAndAngle?.angle && (
-          <div className='absolute bottom-18 right-5 md:right-6 cursor-pointer z-[9999] bg-white p-3 rounded-lg'>
+        {/* Indicador simples da direção (pode personalizar melhor depois) */}
+        {distanceAndAngle?.angle !== undefined && (
+          <div className='absolute bottom-20 right-5 md:right-6 z-[9999] bg-white p-3 rounded-lg shadow'>
             <img
               src='arrow-direction.png'
               alt='Direção'
-              style={{ transform: `rotate(${distanceAndAngle.angle}deg)` }}
-              className='w-4 h-4 transition-transform duration-300'
+              style={{
+                width: '16px',
+                height: '16px',
+                transform: `rotate(${distanceAndAngle.angle}deg)`,
+              }}
             />
           </div>
         )}
       </>
     );
+
+  return null;
 }
